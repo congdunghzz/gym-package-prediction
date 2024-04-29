@@ -35,11 +35,10 @@ model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X, y)
 
 # Hàm để dự đoán cho dòng dữ liệu mới
-def predict_new_data(new_data):
+def predict_new_data(new_data, y):
     new_data_encoded = []  # Danh sách để lưu trữ các giá trị được mã hóa
 
     # Duyệt qua từng cột trong new_data
-     # Duyệt qua từng cột trong new_data
     for column in new_data.keys():
         # Kiểm tra nếu cột là kiểu 'object' thì mới mã hóa
         if column in label_encoders:
@@ -55,20 +54,27 @@ def predict_new_data(new_data):
             new_data_encoded.append(new_data[column])
 
     new_data_scaled = scaler.transform([new_data_encoded])
-    predicted_package = model.predict(new_data_scaled)
-    return predicted_package[0]
+    
+    # Chuyển đổi đầu vào y thành mảng 1D nếu cần
+    if y.ndim == 2:
+        y = y.ravel()
+
+    predicted_package_encoded = model.predict(new_data_scaled)
+    predicted_package = label_encoders['package'].inverse_transform([predicted_package_encoded])[0]
+    return predicted_package
+
 
 # Dùng hàm để dự đoán cho dòng dữ liệu mới
 
 new_data_row = {
     'job': 'Học sinh - sinh viên',
-    'income': 'Trên 20 triệu',
-    'height': 1.75,
+    'income': '5 -10 triệu',
+    'height': 1.78,
     'gender': 'Nam',
-    'weight': 68,
-    'workout_frequency': '1 - 3 buổi / tuần'
+    'weight': 75,
+    'workout_frequency': 'Trên 5 buổi / tuần'
 }
 print(new_data_row.keys())
 
-predicted_package = predict_new_data(new_data_row)
+predicted_package = predict_new_data(new_data_row, y)
 print("Predicted package for new data:", predicted_package)
