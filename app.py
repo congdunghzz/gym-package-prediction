@@ -21,6 +21,10 @@ from sklearn.ensemble import RandomForestClassifier
 
 # Đọc dữ liệu từ file CSV
 data = pd.read_csv('data.csv',encoding='utf-8')
+def calculate_bmi(height, weight):
+    return weight / (height ** 2)
+
+data['bmi'] = calculate_bmi(data['height'], data['weight'])
 
 label_encoders = {}
 
@@ -31,11 +35,10 @@ for column, dtype in data.dtypes.items():
         data[column] = label_encoders[column].fit_transform(data[column])
 
 
+data = data.drop(columns=['isGym', 'dateTime', 'isUpgrade', 'email', 'height', 'weight'], axis=1)
 data = data.dropna()
 
-# Phân chia features và target
-X = data.drop(columns=['package','isGym', 'dateTime', 'isUpgrade', 'email'], axis=1) 
-
+X = data.drop(columns=['package'], axis=1)
 y = data['package']
 print(y)
 print(X)
@@ -63,8 +66,8 @@ def predict_new_data(new_data, y):
             encoded_value = label_encoders[column].transform([value])[0]
             
             new_data_encoded.append(encoded_value)
-        else:
-            # Nếu là kiểu số thì giữ nguyên giá trị và thêm vào danh sách new_data_encoded
+
+        elif column == 'bmi':  # Đối với cột BMI, giữ nguyên giá trị
             new_data_encoded.append(new_data[column])
 
     new_data_scaled = scaler.transform([new_data_encoded])
@@ -225,16 +228,20 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def predict(self):
-        
+        if float(self.height.text()) > 3 or float(self.height.text()) < 0 or float(self.weight.text()) < 0 or float(self.weight.text()) > 300:
+            msg = QtWidgets.QMessageBox()
+            msg.setInformativeText('Giá trị nhập vào không hợp lệ')
+            msg.exec()
+            return
         try:
             new_data_row = {
                 'job': self.job.currentText(),
                 'income': self.income.currentText(),
-                'height': float(self.height.text()),
+                'bmi': calculate_bmi(float(self.height.text()), float(self.weight.text())),
                 'gender': self.gender.currentText(),
-                'weight': float(self.weight.text()),
                 'workout_frequency': self.workout_frequency.currentText()
             }
+            
             result = predict_new_data(new_data_row, y)
             self.result.setText(str(result))
         except Exception as e:

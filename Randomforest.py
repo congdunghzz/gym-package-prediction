@@ -8,6 +8,11 @@ from sklearn.ensemble import RandomForestClassifier
 # Đọc dữ liệu từ file CSV
 data = pd.read_csv('data.csv',encoding='utf-8')
 
+def calculate_bmi(height, weight):
+    return weight / (height ** 2)
+
+data['bmi'] = calculate_bmi(data['height'], data['weight'])
+
 label_encoders = {}
 
 for column, dtype in data.dtypes.items():
@@ -17,11 +22,12 @@ for column, dtype in data.dtypes.items():
         data[column] = label_encoders[column].fit_transform(data[column])
 
 
-data = data.dropna()
 
 # Phân chia features và target
-X = data.drop(columns=['package','isGym', 'dateTime', 'isUpgrade', 'email'], axis=1) 
+data = data.drop(columns=['isGym', 'dateTime', 'isUpgrade', 'email', 'height', 'weight'], axis=1)
+data = data.dropna()
 
+X = data.drop(columns=['package'], axis=1)
 y = data['package']
 print(y)
 print(X)
@@ -49,8 +55,8 @@ def predict_new_data(new_data, y):
             encoded_value = label_encoders[column].transform([value])[0]
             
             new_data_encoded.append(encoded_value)
-        else:
-            # Nếu là kiểu số thì giữ nguyên giá trị và thêm vào danh sách new_data_encoded
+
+        elif column == 'bmi':  # Đối với cột BMI, giữ nguyên giá trị
             new_data_encoded.append(new_data[column])
 
     new_data_scaled = scaler.transform([new_data_encoded])
@@ -69,9 +75,8 @@ def predict_new_data(new_data, y):
 new_data_row = {
     'job': 'Học sinh - sinh viên',
     'income': '5 -10 triệu',
-    'height': 1.78,
+    'bmi': calculate_bmi(1.78, 75),
     'gender': 'Nam',
-    'weight': 75,
     'workout_frequency': 'Trên 5 buổi / tuần'
 }
 print(new_data_row.keys())
