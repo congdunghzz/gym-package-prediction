@@ -248,7 +248,7 @@ class Ui_MainWindow(object):
             self.result.setText(str(result))
         except Exception as e:
             msg = QtWidgets.QMessageBox()
-            msg.setInformativeText('Giá trị nhập vào không hợp lệ: ' + e )
+            msg.setInformativeText('Giá trị nhập vào không hợp lệ: ' + e)
             msg.exec()
 
     def retranslateUi(self, MainWindow):
