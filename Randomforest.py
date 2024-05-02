@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
+import matplotlib.pyplot as plt
 
 # Đọc dữ liệu từ file CSV
 data = pd.read_csv('data.csv',encoding='utf-8')
@@ -24,7 +25,7 @@ for column, dtype in data.dtypes.items():
 
 
 # Phân chia features và target
-data = data.drop(columns=['isGym', 'dateTime', 'isUpgrade', 'email', 'height', 'weight'], axis=1)
+data = data.drop(columns=['isGym', 'dateTime', 'isUpgrade', 'email'], axis=1)
 data = data.dropna()
 
 X = data.drop(columns=['package'], axis=1)
@@ -56,7 +57,7 @@ def predict_new_data(new_data, y):
             
             new_data_encoded.append(encoded_value)
 
-        elif column == 'bmi':  # Đối với cột BMI, giữ nguyên giá trị
+        else:  # Đối với cột BMI, giữ nguyên giá trị
             new_data_encoded.append(new_data[column])
 
     new_data_scaled = scaler.transform([new_data_encoded])
@@ -75,6 +76,8 @@ def predict_new_data(new_data, y):
 new_data_row = {
     'job': 'Học sinh - sinh viên',
     'income': '5 -10 triệu',
+    'height' : 1.78,
+    'weight' : 75,
     'bmi': calculate_bmi(1.78, 75),
     'gender': 'Nam',
     'workout_frequency': 'Trên 5 buổi / tuần'
